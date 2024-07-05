@@ -1,1 +1,30 @@
-target/*
+# Ignorar la carpeta target donde se generan los binarios y dependencias compiladas
+/target
+
+# Ignorar archivos de configuración y ambiente de Rust
+**/*.rs.bk
+
+# Ignorar archivos de log
+Cargo.lock
+
+# Sistema de archivos
+.DS_Store
+Thumbs.db
+app.db
+
+# Archivos de editor y configuración específica del entorno de desarrollo
+.idea/
+*.swp
+*.swo
+.vscode/
+
+# Ignorar los archivos de backup creados por editores de texto como Vim
+*~
+
+# Ignorar archivos que pueden contener información sensible
+.env
+.secret
+
+# Archivos generados por cargo doc
+/target/doc/
+/doc/
