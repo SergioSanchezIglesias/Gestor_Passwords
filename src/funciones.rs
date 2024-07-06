@@ -117,13 +117,13 @@ pub fn agregar_usuario(user_manager: &UserManager) {
         .expect("Failed to read line.");
 
     let usuario = Usuario {
-      id: None,
-      username: username.trim().to_string(),
-      password: password.trim().to_string(),
+        id: None,
+        username: username.trim().to_string(),
+        password: password.trim().to_string(),
     };
 
     match user_manager.agregar_usuario(&usuario) {
-      Ok(_) => println!("Usuario añadido correctamente."),
-      Err(e) => println!("Error al añadir usuario: {}", e),
+        Ok(_) => println!("Usuario añadido correctamente."),
+        Err(e) => println!("Error al añadir usuario: {}", e),
     }
 }
