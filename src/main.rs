@@ -1,8 +1,48 @@
 mod db;
+mod funciones;
+mod usuario;
+
+use db::Database;
+use rusqlite::Connection;
+use std::env;
+use usuario::UserManager;
 
 fn main() {
-    match db::setup_database() {
-        Ok(_) => println!("Database setup completed successfully."),
-        Err(e) => println!("Error setting up de database: {}", e),
+    let args: Vec<String> = env::args().collect();
+
+    if !funciones::args_validation(&args) {
+        return;
+    }
+
+    if funciones::args_management(&args) {
+        return;
+    }
+
+    let db = match Database::initialize("app.db") {
+        Ok(db) => db,
+        Err(e) => {
+            println!("{}", e);
+            return;
+        }
+    };
+
+    let conn: &Connection = db.get_connection();
+    let user_manager: UserManager = UserManager::new(conn);
+
+    loop {
+        funciones::show_menu();
+
+        let choice = funciones::get_option();
+
+        match choice {
+            1 => {
+                funciones::agregar_usuario(&user_manager);
+            }
+
+            2 => funciones::autenticar_usuario(&user_manager),
+
+            3 => break,
+            _ => println!("Opción no válida. Introduce una opción correcta."),
+        }
     }
 }
