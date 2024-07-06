@@ -34,12 +34,12 @@ impl<'a> UserManager<'a> {
     // }
 
     // Obtener un usuario
-    pub fn comprobar_usuario(&self, username: &str, password: &str) -> Result<Option<Usuario>> {
+    pub fn comprobar_usuario(&self, username: &str) -> Result<Option<Usuario>> {
         let mut stmt = self.conn.prepare(
-            "SELECT UserID, Username, Password FROM Usuarios WHERE Username = ?1 AND Password = ?2",
+            "SELECT UserID, Username, Password FROM Usuarios WHERE Username = ?1",
         )?;
 
-        let mut usuario_iter = stmt.query_map(params![username, password], |row| {
+        let mut usuario_iter = stmt.query_map(params![username], |row| {
             Ok(Usuario {
                 id: Some(row.get(0)?),
                 username: row.get(1)?,

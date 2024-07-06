@@ -21,7 +21,7 @@ impl Database {
         )?;
 
         self.conn.execute(
-            "CREATE TABLE IF NOT EXISTS Contraseñas (
+            "CREATE TABLE IF NOT EXISTS Passwords (
               PasswordID INTEGER PRIMARY KEY AUTOINCREMENT,
               UserID INTEGER NOT NULL,
               Nombre_del_Servicio TEXT NOT NULL,

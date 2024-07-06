@@ -1,3 +1,4 @@
+use bcrypt::{hash, verify, DEFAULT_COST};
 use std::io::{self, Write};
 
 use crate::db;
@@ -64,8 +65,14 @@ pub fn args_management(args: &[String]) -> bool {
         let conn = db.get_connection();
         let user_manager = usuario::UserManager::new(conn);
 
-        match user_manager.comprobar_usuario(username, password) {
-            Ok(Some(usuario)) => println!("Usuario autenticado. ID: {}", usuario.id.unwrap()),
+        match user_manager.comprobar_usuario(username.trim()) {
+            Ok(Some(usuario)) => {
+                if verify(password.trim(), &usuario.password).unwrap_or(false) {
+                    println!("Usuario  autenticado. ID {}", usuario.id.unwrap());
+                } else {
+                    println!("Usuario o contraseña incorrecto.");
+                }
+            }
             Ok(None) => println!("Usuario o contraseña incorrectos."),
             Err(e) => println!("Error al verificar el usuario: {}", e),
         }
@@ -94,8 +101,14 @@ pub fn autenticar_usuario(user_manager: &UserManager) {
         .read_line(&mut password)
         .expect("Failed to read line.");
 
-    match user_manager.comprobar_usuario(username.trim(), password.trim()) {
-        Ok(Some(usuario)) => println!("Usuario autenticado. ID: {}", usuario.id.unwrap()),
+    match user_manager.comprobar_usuario(username.trim()) {
+        Ok(Some(usuario)) => {
+            if verify(password.trim(), &usuario.password).unwrap_or(false) {
+                println!("Usuario  autenticado. ID {}", usuario.id.unwrap());
+            } else {
+                println!("Usuario o contraseña incorrecto.");
+            }
+        }
         Ok(None) => println!("Usuario o contraseña incorrectos."),
         Err(e) => println!("Error al verificar el usuario: {}", e),
     }
@@ -116,10 +129,18 @@ pub fn agregar_usuario(user_manager: &UserManager) {
         .read_line(&mut password)
         .expect("Failed to read line.");
 
+    let hashed_password: String = match hash(password.trim(), DEFAULT_COST) {
+        Ok(hp) => hp,
+        Err(e) => {
+            println!("Error al cifrar la contraseña: {}", e);
+            return;
+        }
+    };
+
     let usuario = Usuario {
         id: None,
         username: username.trim().to_string(),
-        password: password.trim().to_string(),
+        password: hashed_password,
     };
 
     match user_manager.agregar_usuario(&usuario) {

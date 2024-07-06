@@ -39,9 +39,7 @@ fn main() {
                 funciones::agregar_usuario(&user_manager);
             }
 
-            2 => {
-                funciones::autenticar_usuario(&user_manager)
-            }
+            2 => funciones::autenticar_usuario(&user_manager),
 
             3 => break,
             _ => println!("Opción no válida. Introduce una opción correcta."),
