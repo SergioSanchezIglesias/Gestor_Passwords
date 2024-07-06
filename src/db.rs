@@ -37,4 +37,12 @@ impl Database {
     pub fn get_connection(&self) -> &Connection {
         &self.conn
     }
+
+    pub fn initialize(db_path: &str) -> Result<Self, String> {
+        let db = Database::new(db_path)
+            .map_err(|e| format!("Error connecting to the database: {}", e))?;
+        db.setup()
+            .map_err(|e| format!("Error setting up the database: {}", e))?;
+        Ok(db)
+    }
 }
