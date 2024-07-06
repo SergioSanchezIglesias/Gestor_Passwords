@@ -1,43 +1,40 @@
 use rusqlite::{Connection, Result};
 
-pub fn connect_db() -> Result<Connection> {
-    Connection::open("app.db").map_err(|e| {
-        eprintln!("Error al conectar con la base de datos: {}", e);
-        e
-    })
+pub struct Database {
+    conn: Connection,
 }
 
-pub fn setup_database() -> Result<()> {
-    let conn = connect_db()?;
+impl Database {
+    pub fn new(db_path: &str) -> Result<Self> {
+        let conn = Connection::open(db_path)?;
+        Ok(Database { conn })
+    }
 
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS Usuarios (
-          UserID INTEGER PRIMARY KEY AUTOINCREMENT,
-          Username TEXT NOT NULL UNIQUE,
-          Password TEXT NOT NULL
-      )",
-        [],
-    )
-    .map_err(|e| {
-        eprintln!("Error al crear la tabla Usuarios: {}", e);
-        e
-    })?;
+    pub fn setup(&self) -> Result<()> {
+        self.conn.execute(
+            "CREATE TABLE IF NOT EXISTS Usuarios (
+              UserID INTEGER PRIMARY KEY AUTOINCREMENT,
+              Username TEXT NOT NULL UNIQUE,
+              Password TEXT NOT NULL
+          )",
+            [],
+        )?;
 
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS Contraseñas (
-          PasswordID INTEGER PRIMARY KEY AUTOINCREMENT,
-          UserID INTEGER NOT NULL,
-          Nombre_del_Servicio TEXT NOT NULL,
-          Username TEXT NOT NULL,
-          Password TEXT NOT NULL,
-          FOREIGN KEY(UserID) REFERENCES Usuarios(UserID)
-      )",
-        [],
-    )
-    .map_err(|e| {
-        eprintln!("Error al crear la tabla Contraseñas: {}", e);
-        e
-    })?;
+        self.conn.execute(
+            "CREATE TABLE IF NOT EXISTS Contraseñas (
+              PasswordID INTEGER PRIMARY KEY AUTOINCREMENT,
+              UserID INTEGER NOT NULL,
+              Nombre_del_Servicio TEXT NOT NULL,
+              Username TEXT NOT NULL,
+              Password TEXT NOT NULL,
+              FOREIGN KEY(UserID) REFERENCES Usuarios(UserID)
+          )",
+            [],
+        )?;
+        Ok(())
+    }
 
-    Ok(())
+    pub fn get_connection(&self) -> &Connection {
+        &self.conn
+    }
 }
