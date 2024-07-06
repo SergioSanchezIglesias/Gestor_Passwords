@@ -36,11 +36,11 @@ fn main() {
 
         match choice {
             1 => {
-                println!("Función añadir usuarios no implementada");
+                funciones::agregar_usuario(&user_manager);
             }
 
             2 => {
-                println!("Función autenticar usuario no implementada")
+                funciones::autenticar_usuario(&user_manager)
             }
 
             3 => break,

@@ -25,13 +25,13 @@ impl<'a> UserManager<'a> {
     }
 
     // Eliminar usuario de la base de datos
-    pub fn eliminar_usuario(&self, username: &str) -> Result<()> {
-        self.conn.execute(
-            "DELETE FROM Usuarios WHERE Username = ?1",
-            params![username],
-        )?;
-        Ok(())
-    }
+    // pub fn eliminar_usuario(&self, username: &str) -> Result<()> {
+    //     self.conn.execute(
+    //         "DELETE FROM Usuarios WHERE Username = ?1",
+    //         params![username],
+    //     )?;
+    //     Ok(())
+    // }
 
     // Obtener un usuario
     pub fn comprobar_usuario(&self, username: &str, password: &str) -> Result<Option<Usuario>> {
@@ -54,22 +54,22 @@ impl<'a> UserManager<'a> {
     }
 
     // Listar todos los usuarios
-    pub fn listar_usuarios(&self) -> Result<Vec<Usuario>> {
-        let mut smt = self
-            .conn
-            .prepare("SELECT UserID, Username, Password FROM Usuarios")?;
-        let usuario_iter = smt.query_map([], |row| {
-            Ok(Usuario {
-                id: Some(row.get(0)?),
-                username: row.get(1)?,
-                password: row.get(2)?,
-            })
-        })?;
+    // pub fn listar_usuarios(&self) -> Result<Vec<Usuario>> {
+    //     let mut smt = self
+    //         .conn
+    //         .prepare("SELECT UserID, Username, Password FROM Usuarios")?;
+    //     let usuario_iter = smt.query_map([], |row| {
+    //         Ok(Usuario {
+    //             id: Some(row.get(0)?),
+    //             username: row.get(1)?,
+    //             password: row.get(2)?,
+    //         })
+    //     })?;
 
-        let mut usuarios = Vec::new();
-        for usuario in usuario_iter {
-            usuarios.push(usuario?);
-        }
-        Ok(usuarios)
-    }
+    //     let mut usuarios = Vec::new();
+    //     for usuario in usuario_iter {
+    //         usuarios.push(usuario?);
+    //     }
+    //     Ok(usuarios)
+    // }
 }
