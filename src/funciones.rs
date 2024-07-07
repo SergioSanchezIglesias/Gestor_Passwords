@@ -1,4 +1,5 @@
 use bcrypt::{hash, verify, DEFAULT_COST};
+use colored::Colorize;
 use std::io::{self, Write};
 
 use crate::db;
@@ -10,20 +11,22 @@ pub fn show_menu() {
     println!("\n1. Agregar usuario");
     println!("2. Autenticar usuario");
     println!("3. Salir");
+    println!();
 }
 
 pub fn show_help() {
     println!("Uso:");
     println!("cargo run -- -h --help     Mostrar ayuda.");
     println!("cargo run -- <username> <password>     Entra a la aplicación estando autenticado.");
-    println!("cargo run     Entra a la aplicación sin autenticar.")
+    println!("cargo run     Entra a la aplicación sin autenticar.");
+    println!();
 }
 
 pub fn get_option() -> u32 {
     loop {
         let mut choice: String = String::new();
 
-        println!("Seleccione una opción");
+        print!("{}", "\nSeleccione una opción: ".yellow());
         io::stdout().flush().unwrap();
 
         io::stdin()
@@ -32,14 +35,14 @@ pub fn get_option() -> u32 {
 
         match choice.trim().parse() {
             Ok(num) => return num,
-            Err(_) => println!("Introduce un número válido."),
+            Err(_) => println!("{}", "Introduce un número válido.".red()),
         };
     }
 }
 
 pub fn args_validation(args: &[String]) -> bool {
     if args.len() > 1 && args[1].starts_with('-') && args[1] != "-h" && args[1] != "--help" {
-        println!("Opción no válida.");
+        println!("{}", "Opción no válida.".red());
         return false;
     }
 
@@ -68,18 +71,19 @@ pub fn args_management(args: &[String]) -> bool {
         match user_manager.comprobar_usuario(username.trim()) {
             Ok(Some(usuario)) => {
                 if verify(password.trim(), &usuario.password).unwrap_or(false) {
+                    println!("{}", "Usuario autenticado correctamente.".green());
                     let user_id = usuario.id.unwrap_or(0);
                     menu_password_management(&user_manager, user_id);
                 } else {
-                    println!("Usuario o contraseña incorrecto.");
+                    println!("{}", "\nUsuario o contraseña incorrecto.".red());
                 }
             }
-            Ok(None) => println!("Usuario o contraseña incorrectos."),
-            Err(e) => println!("Error al verificar el usuario: {}", e),
+            Ok(None) => println!("{}", "Usuario o contraseña incorrectos.".red()),
+            Err(_) => println!("{}", "Error al verificar el usuario".red()),
         }
         return true;
-    } else if args.len() > 3 {
-        println!("Demasiados argumentos");
+    } else if args.len() > 1 {
+        println!("{}", "\nNúmero de argumentos incorrecto.".red());
         show_help();
         return true;
     }
@@ -88,7 +92,7 @@ pub fn args_management(args: &[String]) -> bool {
 }
 
 pub fn autenticar_usuario(user_manager: &UserManager) -> Option<Usuario> {
-    print!("Introduce el nombre de usuario: ");
+    print!("\nIntroduce el nombre de usuario: ");
     io::stdout().flush().unwrap();
     let mut username: String = String::new();
     io::stdin()
@@ -105,20 +109,21 @@ pub fn autenticar_usuario(user_manager: &UserManager) -> Option<Usuario> {
     match user_manager.comprobar_usuario(username.trim()) {
         Ok(Some(usuario)) => {
             if verify(password.trim(), &usuario.password).unwrap_or(false) {
+                println!("{}", "Usuario autenticado correctamente.".green());
                 return Some(usuario);
             } else {
-                println!("Usuario o contraseña incorrecto.");
+                println!("{}", "Usuario o contraseña incorrecto.".red());
             }
         }
-        Ok(None) => println!("Usuario o contraseña incorrectos."),
-        Err(e) => println!("Error al verificar el usuario: {}", e),
+        Ok(None) => println!("{}", "Usuario o contraseña incorrectos.".red()),
+        Err(_) => println!("{}", "Error al verificar el usuario.".red()),
     }
 
     None
 }
 
 pub fn agregar_usuario(user_manager: &UserManager) {
-    print!("Introduce el nombre de usuario: ");
+    print!("\nIntroduce el nombre de usuario: ");
     io::stdout().flush().unwrap();
     let mut username: String = String::new();
     io::stdin()
@@ -134,8 +139,8 @@ pub fn agregar_usuario(user_manager: &UserManager) {
 
     let hashed_password: String = match hash(password.trim(), DEFAULT_COST) {
         Ok(hp) => hp,
-        Err(e) => {
-            println!("Error al cifrar la contraseña: {}", e);
+        Err(_) => {
+            println!("{}", "Error al cifrar la contraseña.".red());
             return;
         }
     };
@@ -147,8 +152,8 @@ pub fn agregar_usuario(user_manager: &UserManager) {
     };
 
     match user_manager.agregar_usuario(&usuario) {
-        Ok(_) => println!("Usuario añadido correctamente."),
-        Err(e) => println!("Error al añadir usuario: {}", e),
+        Ok(_) => println!("{}", "Usuario añadido correctamente.".green()),
+        Err(_) => println!("{}", "Error al añadir usuario.".red()),
     }
 }
 
@@ -166,13 +171,13 @@ pub fn menu_password_management(user_manager: &UserManager, user_id: i32) {
             2 => obtener_user_password(user_manager, user_id),
             3 => obtener_all_user_passwords(user_manager, user_id),
             4 => break,
-            _ => println!("Opción no válida, intente de nuevo."),
+            _ => println!("{}", "Opción no válida, intente de nuevo.".red()),
         }
     }
 }
 
 pub fn crear_user_password(user_manager: &UserManager, user_id: i32) {
-    print!("Introduce el nombre del servicio: ");
+    print!("\nIntroduce el nombre del servicio: ");
     io::stdout().flush().unwrap();
     let mut servicio: String = String::new();
     io::stdin()
@@ -194,7 +199,7 @@ pub fn crear_user_password(user_manager: &UserManager, user_id: i32) {
         .expect("Failed to read line.");
 
     // Debido a que no se puede revertir el hash, de momento se almacena en texto claro
-    
+
     // let hashed_password = match hash(password.trim(), DEFAULT_COST) {
     //     Ok(hp) => hp,
     //     Err(e) => {
@@ -212,8 +217,14 @@ pub fn crear_user_password(user_manager: &UserManager, user_id: i32) {
     };
 
     match user_manager.agregar_password(&password_usuario) {
-        Ok(_) => println!("Contraseña para el servicio añadida correctamente."),
-        Err(e) => println!("Error al agregar la contraseña para el servicio: {}", e),
+        Ok(_) => println!(
+            "{}",
+            "Contraseña para el servicio añadida correctamente.".green()
+        ),
+        Err(_) => println!(
+            "{}",
+            "Error al agregar la contraseña para el servicio.".red()
+        ),
     }
 }
 
@@ -229,13 +240,19 @@ pub fn obtener_user_password(user_manager: &UserManager, user_id: i32) {
         Ok(Some((username, password))) => {
             print!(
                 "Servicio: {} - Username o Correo: {} - Contraseña: {}",
-                servicio.trim(),
-                username.trim(),
-                password.trim(),
+                servicio.trim().green(),
+                username.trim().green(),
+                password.trim().green(),
             );
         }
-        Ok(None) => println!("No se encontró ninguna contraseña para ese servicio."),
-        Err(e) => println!("Error al obtener la contraseña para el servicio: {}", e),
+        Ok(None) => println!(
+            "{}",
+            "No se encontró ninguna contraseña para ese servicio.".red()
+        ),
+        Err(_) => println!(
+            "{}",
+            "Error al obtener la contraseña para el servicio.".red()
+        ),
     }
 }
 
@@ -245,12 +262,12 @@ pub fn obtener_all_user_passwords(user_manager: &UserManager, user_id: i32) {
             for (username, password, servicio) in passwords {
                 print!(
                     "Username o Correo: {} - Contraseña: {} - Servicio: {}\n",
-                    username.trim(),
-                    password.trim(),
-                    servicio.trim(),
+                    username.trim().green(),
+                    password.trim().green(),
+                    servicio.trim().green(),
                 );
             }
         }
-        Err(e) => println!("Error al obtener todas las contraseñas: {}", e),
+        Err(_) => println!("{}", "Error al obtener todas las contraseñas.".red()),
     }
 }
