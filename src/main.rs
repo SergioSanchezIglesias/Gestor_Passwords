@@ -39,7 +39,11 @@ fn main() {
                 funciones::agregar_usuario(&user_manager);
             }
 
-            2 => funciones::autenticar_usuario(&user_manager),
+            2 => {
+                if let Some(usuario) = funciones::autenticar_usuario(&user_manager) {
+                    funciones::menu_password_management(&user_manager, usuario.id.unwrap());
+                }
+            }
 
             3 => break,
             _ => println!("Opción no válida. Introduce una opción correcta."),
